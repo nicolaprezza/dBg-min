@@ -16,7 +16,7 @@ format_t format = fastq;
 
 bool D = false;
 bool pause_ = false;
-bool do_not_optimize = false;
+bool prune = false;
 
 void help(){
 	cout << "dBg-min: builds the de Bruijn graph and compute the minimum equivalent Wheeler DFA." << endl << endl;
@@ -24,7 +24,7 @@ void help(){
 	cout << "   Options:"<<endl;
 	cout << "   -l <nlines>         Use only the first nlines sequences from the input file to build the graph. If set to 0, use all lines. Default: 0."<<endl;
 	cout << "   -a                  The input file is fasta. If not specified, it is assumed that the input file is fastq."<<endl;
-	cout << "   -o                  Turn off space optimization (does not prune the dBg)."<<endl;
+	cout << "   -p                  Optimize space by pruning unnecessary dummy nodes (relevant if number of sequences is large)."<<endl;
 	cout << "   <input>             Input fasta/fastq file (see option -a). Mandatory."<<endl;
 	cout << "   <k>                 Order of the de Bruijn graph in [1,41]. Mandatory."<<endl;
 	exit(0);
@@ -50,9 +50,9 @@ void parse_args(char** argv, int argc, int &ptr){
 
 		format = fasta;
 
-	}else if(s.compare("-o")==0){
+	}else if(s.compare("-p")==0){
 
-		do_not_optimize = true;
+		prune = true;
 
 	}else{
 		cout << "Error: unrecognized '" << s << "' option." << endl;
@@ -81,11 +81,11 @@ int main(int argc, char** argv){
 	}
 
 	cout << "Building de Bruijn graph of input file " << input_file << endl;
-	cout << "called as: dBg-min " << (format==fasta?"-a ":"") << (do_not_optimize?"-o ":"") << "-l " << nlines << " " << input_file << " " << int(k) << endl;
+	cout << "called as: dBg-min " << (format==fasta?"-a ":"") << (prune?"-p ":"") << "-l " << nlines << " " << input_file << " " << int(k) << endl;
 
 	auto t1 = std::chrono::high_resolution_clock::now();
 
-	dBg G(input_file, format, nlines, k, do_not_optimize, true);
+	dBg G(input_file, format, nlines, k, true);
 
 	auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv){
 
 	auto t3 = std::chrono::high_resolution_clock::now();
 
-	if(not do_not_optimize){
+	if(prune){
 
 		cout << "\nRemoving unnecessary padded nodes ... " << endl;
 		G.prune();
