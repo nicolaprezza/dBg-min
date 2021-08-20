@@ -584,6 +584,7 @@ public:
 
 		}
 
+
 		uint64_t new_nr_of_nodes = 0;
 		for(uint64_t i=0;i<necessary.size();++i) new_nr_of_nodes += necessary[i];
 
@@ -607,6 +608,7 @@ public:
 
 		uint8_t F_char = 0;//current char on F column
 
+
 		for(uint64_t i=0;i<nr_of_nodes;++i){
 
 			//incoming letter of node i
@@ -616,7 +618,9 @@ public:
 
 				new_C_node[F_char]++;
 
-				uint64_t in_deg = 0;
+				uint64_t in_deg = i == 0;
+
+				assert(i == 0 or nodes_start[i+1]-nodes_start[i] > 0);
 
 				for(uint64_t j = nodes_start[i]; j < nodes_start[i+1]; ++j){
 
@@ -624,6 +628,8 @@ public:
 						in_deg++;
 
 				}
+
+				assert(in_deg>0);
 
 				for(uint64_t j = 0;j< in_deg-1;++j){
 
@@ -684,6 +690,8 @@ public:
 
 				if(OUT[bwt_pos]){
 
+					assert(new_out_deg > 0);
+
 					for(int k=0;k<new_out_deg-1;++k) new_OUT.push_back(false);
 					new_OUT.push_back(true);
 
@@ -699,8 +707,6 @@ public:
 			}
 
 		}
-
-
 
 		nr_of_nodes = new_nr_of_nodes;
 		padded_kmers = 0;
