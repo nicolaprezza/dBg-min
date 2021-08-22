@@ -567,20 +567,26 @@ public:
 
 			if(not padded_node[i]){
 
+				int out_deg = nodes_start[i+1]-nodes_start[i];
+
 				//pick first successor of i
-				uint64_t next = nodes_start[i+1]-nodes_start[i] > 0 ? edges[nodes_start[i]] : nr_of_nodes;
+				uint64_t next = out_deg > 0 ? edges[nodes_start[i]] : nr_of_nodes;
 
 				// if this non-padded node has only one successor, which is a padded node,
 				// then the successor is necessary.
-				if(nodes_start[i+1]-nodes_start[i] == 1 && padded_node[next]){
+				if(out_deg == 1 && padded_node[next]){
 
-					//padded nodes must have exactly 1 successor (except node 0 = $$$)
-					assert(next == 0 or nodes_start[next+1]-nodes_start[next] == 1);
+					//padded nodes must have exactly 1 successor (except node 0 = $$$, which has 0 successors)
+					int out_deg_next = nodes_start[next+1]-nodes_start[next];
+					assert(next == 0 or out_deg_next == 1);
 
 					while(next != 0 and not necessary[next]){
 
 						necessary[next] = true;
 						next = edges[nodes_start[next]];
+
+						out_deg_next = nodes_start[next+1]-nodes_start[next];
+						assert(next == 0 or out_deg_next == 1);
 
 					}
 
@@ -595,6 +601,8 @@ public:
 
 		uint64_t new_nr_of_nodes = 0;
 		for(uint64_t i=0;i<necessary.size();++i) new_nr_of_nodes += necessary[i];
+
+		assert(necessary.size() == padded_node.size());
 
 		vector<bool> new_padded_node;
 		for(uint64_t i=0;i<necessary.size();++i)
@@ -614,13 +622,13 @@ public:
 			new_C[toINT('$')]++;
 		}
 
-		uint8_t F_char = 0;//current char on F column
+		uint8_t F_char = 0;//current char on F column (integer format)
 
 
 		for(uint64_t i=0;i<nr_of_nodes;++i){
 
-			//incoming letter of node i
-			while(F_char < 4 && not (i >= C_node[F_char] and i <  C_node[F_char+1]) ) F_char++;
+			//find incoming letter of node i
+			while(F_char < 4 && not (i >= C_node[F_char] and i <  C_node[F_char+1])) F_char++;
 
 			if(necessary[i]){
 
@@ -629,6 +637,7 @@ public:
 				uint64_t in_deg = i == 0;
 
 				assert(i == 0 or nodes_start[i+1]-nodes_start[i] > 0);
+				assert(i != 0 or nodes_start[i+1]-nodes_start[i] == 0 );
 
 				for(uint64_t j = nodes_start[i]; j < nodes_start[i+1]; ++j){
 
@@ -639,7 +648,7 @@ public:
 
 				assert(in_deg>0);
 
-				for(uint64_t j = 0;j< in_deg-1;++j){
+				for(uint64_t j = 0;j<in_deg-1;++j){
 
 					new_IN.push_back(false);
 					new_C[F_char]++;
@@ -686,8 +695,12 @@ public:
 					uint64_t u = curr_node_out;
 					uint64_t v = curr_node_in[toINT(c)];
 
-					new_out_deg++;
-					new_BWT += c;
+					if(necessary[v]){
+
+						new_out_deg++;
+						new_BWT += c;
+
+					}
 
 				}else{
 
