@@ -618,10 +618,6 @@ public:
 			new_C_node[k]=0;
 		}
 
-		if(necessary[0]){
-			new_C[toINT('$')]++;
-		}
-
 		uint8_t F_char = 0;//current char on F column (integer format)
 
 
