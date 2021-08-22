@@ -413,6 +413,13 @@ public:
 		C_node[0] = 0;
 		for(int i=1;i<5;++i) C_node[i] += C_node[i-1];
 
+		uint64_t tot_letters[5];
+		for(int i=0;i<5;++i) tot_letters[i]=0;
+
+		for(auto c:BWT) tot_letters[toINT(c)]++;
+
+		assert(C[4] + tot_letters[4] == IN.size());
+
 		/*
 		cout << "BWT/OUT/IN/padded:\n" << BWT << endl;
 		for(auto b : OUT) cout << uint(b);
@@ -727,6 +734,13 @@ public:
 			C[k] = new_C[k];
 			C_node[k] = new_C_node[k];
 		}
+
+		uint64_t tot_letters[5];
+		for(int i=0;i<5;++i) tot_letters[i]=0;
+
+		for(auto c:BWT) tot_letters[toINT(c)]++;
+
+		assert(C[4] + tot_letters[4] == IN.size());
 
 		/*
 		cout << "BWT/OUT/IN/padded:\n" << BWT << endl;
