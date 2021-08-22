@@ -753,6 +753,8 @@ public:
 
 		for(auto c:BWT) tot_letters[toINT(c)]++;
 
+		cout << "debug : " << C[4] + tot_letters[4] << " " << IN.size() << endl;
+
 		assert(C[4] + tot_letters[4] == IN.size());
 
 		/*
