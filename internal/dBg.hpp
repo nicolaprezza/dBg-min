@@ -413,8 +413,8 @@ public:
 		C_node[0] = 0;
 		for(int i=1;i<5;++i) C_node[i] += C_node[i-1];
 
-
-		/*cout << "BWT/OUT/IN/padded:\n" << BWT << endl;
+		/*
+		cout << "BWT/OUT/IN/padded:\n" << BWT << endl;
 		for(auto b : OUT) cout << uint(b);
 		cout << endl;
 		for(auto b : IN) cout << uint(b);
@@ -432,7 +432,8 @@ public:
 		cout << "C_node[A] = " << C_node[toINT('A')] << endl;
 		cout << "C_node[C] = " << C_node[toINT('C')] << endl;
 		cout << "C_node[G] = " << C_node[toINT('G')] << endl;
-		cout << "C_node[T] = " << C_node[toINT('T')] << endl;*/
+		cout << "C_node[T] = " << C_node[toINT('T')] << endl;
+		*/
 
 	}
 
@@ -751,7 +752,235 @@ public:
 
 	}
 
-	void minimize(){};
+	void minimize(){
+
+		/*
+		 * we now build a (multi)-graph G as follows:
+		 *
+		 * nodes: the n-1 borders between the n nodes of the dBg (sorted in Wheeler order)
+		 * We represent the border (x-1,x) as 'x'
+		 *
+		 * edge (x-1,x) -> (y-1,y) iff the dBg has two labeled edges (y,x,c) and (y-1,x-1,c) for some character c
+		 *
+		 */
+
+
+		//for each node, the starting position of its edges in vector edges
+		auto nodes_start = vector<uint64_t>(nr_of_nodes,0);
+		vector<uint64_t> edges;
+
+		uint64_t F_pos[5];
+		uint64_t curr_node_in[5];
+
+		for(int i=0;i<5;++i){
+			F_pos[i] = C[i];
+			curr_node_in[i] = C_node[i];
+ 		}
+
+		uint64_t curr_node_out = 0;
+		uint64_t m = 0; //number of edges
+
+		//for each letter, store successor of previous node following that letter.
+		//if successor = nr_of_nodes, there is no edge labeled with that letter.
+		uint64_t prev_succ[5];
+		for(int i=0;i<5;++i) prev_succ[i] = nr_of_nodes;
+
+		//the same for current node
+		uint64_t curr_succ[5];
+		for(int i=0;i<5;++i) curr_succ[i] = nr_of_nodes;
+
+		vector<bool> MN(nr_of_nodes,true); //MN equivalence relation
+
+		for(uint64_t bwt_pos=0;bwt_pos<BWT.length();++bwt_pos){
+
+			char c = BWT[bwt_pos];
+
+			if(c != '$'){
+
+				//the dBg has an edge: (u,v)
+				uint64_t u = curr_node_out;
+				uint64_t v = curr_node_in[toINT(c)];
+
+				curr_succ[toINT(c)] = v;
+
+				if(u>0 and v>0){
+
+					//check if also edge (u-1,v-1,c) exists
+					if(prev_succ[toINT(c)] == v-1){
+
+						//in G, node v has an outgoing edge towards u. This encodes the edge (v-1,v) -> (u-1,u)
+						nodes_start[v]++;
+						m++;
+
+					}
+
+				}
+
+				if(IN[F_pos[toINT(c)]++]){
+
+					curr_node_in[toINT(c)]++;
+
+				}
+
+			}
+
+			if(OUT[bwt_pos]){
+
+				//MN[curr_node_out] is true if and only if u and u-1 have the same outgoing letters
+				for(int i=0;curr_node_out>0 and i<5;++i){
+
+					bool prev_has_letter = prev_succ[i]!=nr_of_nodes;
+					bool curr_has_letter = curr_succ[i]!=nr_of_nodes;
+
+					MN[curr_node_out] = MN[curr_node_out] and prev_has_letter == curr_has_letter;
+
+				}
+
+				for(int i=0;i<5;++i){
+
+					prev_succ[i] = curr_succ[i];
+					curr_succ[i] = nr_of_nodes;
+
+				}
+
+				curr_node_out++;
+
+			}
+
+		}
+
+		//cumulate nodes_start
+		for(uint64_t i=nodes_start.size()-1;i>0;--i) nodes_start[i] = nodes_start[i-1];
+		nodes_start[0] = 0;
+		for(int i=1;i<nodes_start.size();++i) nodes_start[i] += nodes_start[i-1];
+
+
+		/*
+		 *  repeat visit and fill edges
+		 */
+
+
+		edges = vector<uint64_t>(m);
+
+		for(int i=0;i<5;++i){
+			F_pos[i] = C[i];
+			curr_node_in[i] = C_node[i];
+ 		}
+
+		curr_node_out = 0;
+
+		for(int i=0;i<5;++i) prev_succ[i] = nr_of_nodes;
+		for(int i=0;i<5;++i) curr_succ[i] = nr_of_nodes;
+
+		for(uint64_t bwt_pos=0;bwt_pos<BWT.length();++bwt_pos){
+
+			char c = BWT[bwt_pos];
+
+			if(c != '$'){
+
+				//the dBg has an edge: (u,v)
+				uint64_t u = curr_node_out;
+				uint64_t v = curr_node_in[toINT(c)];
+
+				curr_succ[toINT(c)] = v;
+
+				if(u>0 and v>0){
+
+					//check if also edge (u-1,v-1,c) exists
+					if(prev_succ[toINT(c)] == v-1){
+
+						edges[nodes_start[v]++] = u;
+
+					}
+
+				}
+
+				if(IN[F_pos[toINT(c)]++]){
+
+					curr_node_in[toINT(c)]++;
+
+				}
+
+			}
+
+			if(OUT[bwt_pos]){
+
+				curr_node_out++;
+
+				for(int i=0;i<5;++i){
+
+					prev_succ[i] = curr_succ[i];
+					curr_succ[i] = nr_of_nodes;
+
+				}
+
+			}
+
+		}
+
+
+		for(uint64_t i=nodes_start.size()-1;i>0;--i) nodes_start[i] = nodes_start[i-1];
+		nodes_start[0] = 0;
+
+		nodes_start.push_back(m);
+
+
+		// reverse dBg built
+
+		/*
+		for(int i=0;i<nodes_start.size();++i) cout << nodes_start[i] << " ";
+		cout << endl;
+
+		for(int i=0;i<edges.size();++i) cout << edges[i] << " ";
+		cout << endl;
+		 */
+
+		//finally, propagate MN following edges in G
+
+		vector<bool> visited(nr_of_nodes,false);
+
+		for(uint64_t i=0;i<nr_of_nodes;++i){
+
+			//if i has not yet been visited and (i-1,i) are not MN-equivalent, propagate backwards
+			//the MN incompatibility
+
+			if(not visited[i] and not MN[i]){
+
+				stack<uint64_t> S;
+				S.push(i);
+
+				while(not S.empty()){
+
+					uint64_t j = S.top();
+					S.pop();
+
+					visited[j] = true;
+					MN[j] = false;
+
+					//push all successors of j
+					for(uint64_t k = nodes_start[j]; k<nodes_start[j+1];++k)
+						S.push(edges[k]);
+
+				}
+
+			}
+
+		}
+
+		MN[0] = 0;//node 0 is not MN-equivalent to its predecessor (there is no predecessor)
+
+		//count how many equivalence classes we have
+		uint64_t MN_classes = 0;
+		for(auto b:MN) MN_classes += (not b);
+
+		cout << MN_classes << " Myhill-Nerode equivalence classes (over " << nr_of_nodes << " nodes)." << endl;
+
+		/*
+		 * TODO: compute actual minimized BWT
+		 */
+
+
+	};
 
 private:
 
