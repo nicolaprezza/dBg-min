@@ -809,12 +809,15 @@ public:
 					if(prev_succ[toINT(c)] == v-1){
 
 						//in G, node v has an outgoing edge towards u. This encodes the edge (v-1,v) -> (u-1,u)
+						assert(v<nodes_start.size());
 						nodes_start[v]++;
 						m++;
 
 					}
 
 				}
+
+				assert(F_pos[toINT(c)]<IN.size());
 
 				if(IN[F_pos[toINT(c)]++]){
 
@@ -824,6 +827,8 @@ public:
 
 			}
 
+			assert(bwt_pos < OUT.size());
+
 			if(OUT[bwt_pos]){
 
 				//MN[curr_node_out] is true if and only if u and u-1 have the same outgoing letters
@@ -831,6 +836,8 @@ public:
 
 					bool prev_has_letter = prev_succ[i]!=nr_of_nodes;
 					bool curr_has_letter = curr_succ[i]!=nr_of_nodes;
+
+					assert(curr_node_out < MN.size());
 
 					MN[curr_node_out] = MN[curr_node_out] and prev_has_letter == curr_has_letter;
 
@@ -889,11 +896,14 @@ public:
 					//check if also edge (u-1,v-1,c) exists
 					if(prev_succ[toINT(c)] == v-1){
 
+						assert(nodes_start[v] < edges.size());
 						edges[nodes_start[v]++] = u;
 
 					}
 
 				}
+
+				assert(F_pos[toINT(c)] < IN.size());
 
 				if(IN[F_pos[toINT(c)]++]){
 
@@ -902,6 +912,8 @@ public:
 				}
 
 			}
+
+			assert(bwt_pos < OUT.size());
 
 			if(OUT[bwt_pos]){
 
@@ -944,6 +956,8 @@ public:
 			//if i has not yet been visited and (i-1,i) are not MN-equivalent, propagate backwards
 			//the MN incompatibility
 
+			assert(i<visited.size() and i < MN.size());
+
 			if(not visited[i] and not MN[i]){
 
 				stack<uint64_t> S;
@@ -954,12 +968,16 @@ public:
 					uint64_t j = S.top();
 					S.pop();
 
+					assert(j<visited.size() and j < MN.size());
+
 					visited[j] = true;
 					MN[j] = false;
 
 					//push all successors of j
-					for(uint64_t k = nodes_start[j]; k<nodes_start[j+1];++k)
+					for(uint64_t k = nodes_start[j]; k<nodes_start[j+1];++k){
+						assert(k<edges.size());
 						S.push(edges[k]);
+					}
 
 				}
 
