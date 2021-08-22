@@ -749,14 +749,6 @@ public:
 
 		for(auto c:BWT) tot_letters[toINT(c)]++;
 
-		cout << "debug : " << C[4] + tot_letters[4] << " " << IN.size() << endl;
-		cout << necessary[0] << endl;
-		cout << C[0] << endl;
-		cout << C[1] << endl;
-		cout << C[2] << endl;
-		cout << C[3] << endl;
-		cout << C[4] << endl;
-
 
 		assert(C[4] + tot_letters[4] == IN.size());
 
