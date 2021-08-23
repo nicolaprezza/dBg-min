@@ -22,6 +22,7 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <unordered_set>
 
 using namespace std;
 
@@ -285,6 +286,11 @@ public:
 
 		assert(k>0 and k<=28);
 
+
+
+
+		/*
+
 		if(verbose)
 			cout << "Computing how much memory I need to allocate ..." << endl;
 
@@ -319,70 +325,82 @@ public:
 
 		}
 
-		ifstream file(filename);
+
 
 		if(verbose){
 			cout << "Number of bases: " << tot_bases << endl;
 			cout << "Trying to allocate " << pre_allocation*16 << " Bytes ... " << endl;
 		}
 
+
+
+
+		*/
+
+
+		ifstream file(filename);
 		int read_lines=0;
 
-		/*
-		 *  vector storing all (k+1)-mers (i.e. edges) using 3 bits per char
-		 *  format example: if k=3 and we have a kmer ACG followed by T, then we store an integer rev(ACG)T = GCAT
-		 *
-		 */
 		vector<kmer_t> kmers;
-		kmers.reserve(pre_allocation);
 
-		if(verbose)
-			cout << "Extracting k-mers from dataset ..." << endl;
+		{
 
-		string str;
-		while (std::getline(file, str) and (nlines == 0 or read_lines < nlines)) { //getline reads header
+			unordered_set<kmer_t> kmer_set;
 
-			getline(file, str);//getline reads DNA
+			//kmers.reserve(pre_allocation);
 
-			// start processing DNA fragment
+			if(verbose)
+				cout << "Extracting k-mers from dataset ..." << endl;
 
-			//first kmer: ($$$,C), where C is the first letter of str
-			kmer_t kmer = init_kmer(str[0]);
+			string str;
+			while (std::getline(file, str) and (nlines == 0 or read_lines < nlines)) { //getline reads header
 
-			kmers.push_back(kmer);
+				getline(file, str);//getline reads DNA
 
-			//push the other kmers
-			for(int i=1;i<str.length();++i){
+				// start processing DNA fragment
 
-				kmer = edge(kmer, str[i],k);
-				kmers.push_back(kmer);
+				//first kmer: ($$$,C), where C is the first letter of str
+				kmer_t kmer = init_kmer(str[0]);
+
+				kmer_set.insert(kmer);
+
+				//push the other kmers
+				for(int i=1;i<str.length();++i){
+
+					kmer = edge(kmer, str[i],k);
+					kmer_set.insert(kmer);
+
+				}
+
+				//last kmer: (ACG,$), where ACG was the last kmer in the DNA fragment
+				kmer = edge(kmer, '$',k);
+				kmer_set.insert(kmer);
+
+				if(format == fastq){
+					getline(file, str);//getline reads +
+					getline(file, str);//getline reads quality
+				}
+
+				read_lines++;
+
+				if(read_lines%1000000==0 and verbose)
+					cout << "read " << read_lines << " sequences" << endl;
 
 			}
 
-			//last kmer: (ACG,$), where ACG was the last kmer in the DNA fragment
-			kmer = edge(kmer, '$',k);
-			kmers.push_back(kmer);
+			if(verbose)
+				cout << "Sorting k-mers ..." << endl;
 
-			if(format == fastq){
-				getline(file, str);//getline reads +
-				getline(file, str);//getline reads quality
-			}
-
-			read_lines++;
-
-			if(read_lines%1000000==0 and verbose)
-				cout << "read " << read_lines << " sequences" << endl;
+			for(auto km : kmer_set) kmers.push_back(km);
+			sort(kmers.begin(),kmers.end());
 
 		}
 
-		if(verbose)
-			cout << "Sorting and de-duplicating k-mers ..." << endl;
-
-		sort(kmers.begin(),kmers.end());
+		/*
 		auto it = unique(kmers.begin(), kmers.end());
 		auto new_size = distance(kmers.begin(), it);
 		kmers.resize(new_size);
-		kmers.shrink_to_fit();
+		kmers.shrink_to_fit();*/
 
 		nr_of_edges = 0;
 
@@ -463,7 +481,7 @@ public:
 
 		//compute successor of every kmer: edge (ACG,T) becomes (CGT,$). Ignore edges labeled with $: (ACG,$)
 
-		new_size = 0;
+		uint64_t new_size = 0;
 		for(uint64_t i=0;i<kmers.size();++i){
 
 			if(get_edge(kmers[i]) != '$'){
