@@ -120,10 +120,10 @@ int main(int argc, char** argv){
 	elapsed = std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count();
 	cout << "\nDone. Elapsed time (hh:mm:ss): " << elapsed/3600 << ":" << (elapsed%3600)/60 << ":" << (elapsed%3600)%60 << endl;
 
-	cout << "Number of kmers " << G.number_of_distinct_kmers() << endl;
-	cout << "Number of dummy nodes " << G.number_of_padded_kmers() << endl;
-	cout << "Total number of nodes (kmers + dummy nodes) " << G.number_of_nodes() << endl;
-	cout << "Number of edges " << G.number_of_edges() << endl;
+	//cout << "Number of kmers " << G.number_of_distinct_kmers() << endl;
+	//cout << "Number of dummy nodes " << G.number_of_padded_kmers() << endl;
+	//cout << "Total number of nodes (kmers + dummy nodes) " << G.number_of_nodes() << endl;
+	//cout << "Number of edges " << G.number_of_edges() << endl;
 
 
 }
