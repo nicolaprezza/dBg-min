@@ -4,7 +4,7 @@ Author: Nicola Prezza.
 
 ### Description
 
-Builds the de Bruijn graph from a fasta/fastq and computes in linear time the minimum equivalent Wheeler DFA using a new algorithm (to appear).
+Builds the de Bruijn graph from a fasta/fastq file and computes the minimum equivalent Wheeler DFA using a new linear-time algorithm (to appear).
 
 Note: this preliminary tool just computes the number of Wheeler Myhill-Nerode equivalence classes in the minimized WDFA. It does not compute the minimum Wheeler DFA itself. 
 
