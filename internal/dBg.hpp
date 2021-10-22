@@ -1149,7 +1149,7 @@ public:
 		uint64_t MN_classes = 0;
 		for(auto b:MN) MN_classes += (not b);
 
-		cout << MN_classes << " Myhill-Nerode equivalence classes (over " << nr_of_nodes << " nodes)." << endl;
+		cout << MN_classes << " Wheeler Myhill-Nerode equivalence classes (over " << nr_of_nodes << " nodes)." << endl;
 
 		/*
 		 * TODO: compute actual minimized BWT
