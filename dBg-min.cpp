@@ -26,7 +26,7 @@ void help(){
 	cout << "   -a                  The input file is fasta. If not specified, it is assumed that the input file is fastq."<<endl;
 	cout << "   -p                  Optimize space by pruning unnecessary dummy nodes (relevant if number of sequences is large)."<<endl;
 	cout << "   <input>             Input fasta/fastq file (see option -a). Mandatory."<<endl;
-	cout << "   <k>                 Order of the de Bruijn graph in [1,41]. Mandatory."<<endl;
+	cout << "   <k>                 Order of the de Bruijn graph in [1,28]. Mandatory."<<endl;
 	exit(0);
 }
 
