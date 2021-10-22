@@ -1,10 +1,10 @@
-# dBg-min: linear-time minimization of the de Bruijn graph
+# dBg-min: linear-time minimization of the de Bruijn (Wheeler) graph
 
 Author: Nicola Prezza. 
 
 ### Description
 
-Builds the de Bruijn graph from a fasta/fastq and computes in linear time the minimum equivalent Wheeler DFA (note: this may be larger than the minimum equivalent DFA). 
+Builds the de Bruijn graph from a fasta/fastq and computes in linear time the minimum equivalent Wheeler DFA using a new algorithm (to appear).
 
 ### Download
 
