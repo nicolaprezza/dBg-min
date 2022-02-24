@@ -1,6 +1,6 @@
 # dBg-min: linear-time minimization of the de Bruijn (Wheeler) graph
 
-Author: Nicola Prezza. 
+Author: Nicola Prezza.
 
 ### Description
 
